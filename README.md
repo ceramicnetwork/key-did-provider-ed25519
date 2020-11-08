@@ -4,7 +4,7 @@ This is a DID Provider which implements [EIP2844](https://eips.ethereum.org/EIPS
 ## Usage
 
 ```js
-import { Ed25519Provider } from 'key-did-provider-secp256k1'
+import { Ed25519Provider } from 'key-did-provider-ed25519'
 import { DID } from 'dids'
 
 const seed = new Uint8Array(...) //  32 bytes with high entropy
