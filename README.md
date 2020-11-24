@@ -11,22 +11,28 @@ npm install --save key-did-provider-ed25519
 
 ```js
 import { Ed25519Provider } from 'key-did-provider-ed25519'
+import { getResolver } from '@ceramicnetwork/key-did-resolver'
 import { DID } from 'dids'
 
 const seed = new Uint8Array(...) //  32 bytes with high entropy
 const provider = new Ed25519Provider(seed)
-const did = new DID({ provider })
+const did = new DID({ provider, resolver: { registry: getResolver() } })
 await did.authenticate()
 
 // log the DID
 console.log(did.id)
 
 // create JWS
-const { jws, linkedBlock } = did.createDagJWS({ hello: 'world' })
+const { jws, linkedBlock } = await did.createDagJWS({ hello: 'world' })
+
+// verify JWS
+await did.verifyJWS(jws)
+
+// create JWE
+const jwe = await did.createDagJWE({ very: 'secret' }, [did.id])
 
 // decrypt JWE
-const jwe = ... // encrypted JWE
-const decrypted = did.decryptDagJWE(jwe)
+const decrypted = await did.decryptDagJWE(jwe)
 ```
 
 ## License
