@@ -3,7 +3,11 @@ import { verifyJWS, createJWE, x25519Encrypter } from 'did-jwt'
 import { randomBytes } from '@stablelib/random'
 import { KeyPair, generateKeyPairFromSeed, convertPublicKeyToX25519 } from '@stablelib/ed25519'
 
-import { encodeDID, Ed25519Provider } from '../src'
+import { encodeDID, Ed25519Provider, GeneralJWS } from '../src'
+
+const b64urlToObj = (s: string): Record<string, any> =>
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  JSON.parse(u8a.toString(u8a.fromString(s, 'base64url')))
 
 describe('key-did-provider-ed25519', () => {
   let provider: Ed25519Provider
@@ -27,6 +31,28 @@ describe('key-did-provider-ed25519', () => {
 
   it('has isDidProvider property', () => {
     expect(provider.isDidProvider).toEqual(true)
+  })
+
+  it('authenticates correctly', async () => {
+    const nonce = 'adfberg'
+    const aud = 'https://my.app'
+    const paths = ['a', 'b']
+    const resp = await provider.send({
+      jsonrpc: '2.0',
+      id: 0,
+      method: 'did_authenticate',
+      params: { nonce, aud, paths },
+    })
+    const jws = resp?.result as GeneralJWS
+    const payload = b64urlToObj(jws.payload)
+    const header = b64urlToObj(jws.signatures[0].protected)
+    expect(payload.aud).toEqual(aud)
+    expect(payload.nonce).toEqual(nonce)
+    expect(payload.paths).toEqual(paths)
+    expect(payload.did).toEqual(did)
+    expect(payload.exp).toBeGreaterThan(Date.now() / 1000)
+    expect(header.kid).toEqual(expect.stringContaining(did))
+    expect(header.alg).toEqual('EdDSA')
   })
 
   it('signs JWS properly', async () => {

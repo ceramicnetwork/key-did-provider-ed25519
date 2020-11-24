@@ -33,7 +33,7 @@ interface JWSSignature {
   signature: string
 }
 
-interface GeneralJWS {
+export interface GeneralJWS {
   payload: string
   signatures: Array<JWSSignature>
 }
@@ -63,21 +63,42 @@ interface DecryptJWEParams {
 }
 
 interface AuthParams {
+  nonce: string
+  aud: string
   paths: Array<string>
 }
 
+const sign = async (
+  payload: Record<string, any>,
+  did: string,
+  secretKey: Uint8Array,
+  protectedHeader?: Record<string, any>
+) => {
+  const kid = `${did}#${did.split(':')[2]}`
+  const signer = NaclSigner(u8a.toString(secretKey, B64))
+  const header = toStableObject(Object.assign(protectedHeader || {}, { kid, alg: 'EdDSA' }))
+  return createJWS(toStableObject(payload), signer, header)
+}
+
 const didMethods: HandlerMethods<Context> = {
-  did_authenticate: ({ did }, params: AuthParams) => {
-    return { did, paths: params.paths }
+  did_authenticate: async ({ did, secretKey }, params: AuthParams) => {
+    const response = await sign(
+      {
+        did,
+        aud: params.aud,
+        nonce: params.nonce,
+        paths: params.paths,
+        exp: Math.floor(Date.now() / 1000) + 600, // expires 10 min from now
+      },
+      did,
+      secretKey
+    )
+    return toGeneralJWS(response)
   },
   did_createJWS: async ({ did, secretKey }, params: CreateJWSParams) => {
     const requestDid = params.did.split('#')[0]
     if (requestDid !== did) throw new RPCError(4100, `Unknown DID: ${did}`)
-    const pubkey = did.split(':')[2]
-    const kid = `${did}#${pubkey}`
-    const signer = NaclSigner(u8a.toString(secretKey, B64))
-    const header = toStableObject(Object.assign(params.protected || {}, { kid, alg: 'EdDSA' }))
-    const jws = await createJWS(toStableObject(params.payload), signer, header)
+    const jws = await sign(params.payload, did, secretKey, params.protected)
     return { jws: toGeneralJWS(jws) }
   },
   did_decryptJWE: async ({ secretKey }, params: DecryptJWEParams) => {
