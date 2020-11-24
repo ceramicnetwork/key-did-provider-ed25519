@@ -44,8 +44,11 @@ describe('key-did-provider-ed25519', () => {
       controller: '',
       publicKeyBase64: u8a.toString(kp.publicKey, 'base64pad'),
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const gjws = res?.result.jws
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(verifyJWS(res?.result.jws, pubkey)).toEqual(pubkey)
+    const jws = [gjws.signatures[0].protected, gjws.payload, gjws.signatures[0].signature].join('.')
+    expect(verifyJWS(jws, pubkey)).toEqual(pubkey)
   })
 
   it('decrypts JWE properly', async () => {

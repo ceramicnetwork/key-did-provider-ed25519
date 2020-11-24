@@ -28,6 +28,24 @@ export function encodeDID(publicKey: Uint8Array): string {
   return `did:key:z${u8a.toString(bytes, 'base58btc')}`
 }
 
+interface JWSSignature {
+  protected: string
+  signature: string
+}
+
+interface GeneralJWS {
+  payload: string
+  signatures: Array<JWSSignature>
+}
+
+function toGeneralJWS(jws: string): GeneralJWS {
+  const [protectedHeader, payload, signature] = jws.split('.')
+  return {
+    payload,
+    signatures: [{ protected: protectedHeader, signature }],
+  }
+}
+
 interface Context {
   did: string
   secretKey: Uint8Array
@@ -60,7 +78,7 @@ const didMethods: HandlerMethods<Context> = {
     const signer = NaclSigner(u8a.toString(secretKey, B64))
     const header = toStableObject(Object.assign(params.protected || {}, { kid, alg: 'EdDSA' }))
     const jws = await createJWS(toStableObject(params.payload), signer, header)
-    return { jws }
+    return { jws: toGeneralJWS(jws) }
   },
   did_decryptJWE: async ({ secretKey }, params: DecryptJWEParams) => {
     const decrypter = x25519Decrypter(convertSecretKeyToX25519(secretKey))
