@@ -72,11 +72,11 @@ const sign = async (
   payload: Record<string, any>,
   did: string,
   secretKey: Uint8Array,
-  protectedHeader?: Record<string, any>
+  protectedHeader: Record<string, any> = {}
 ) => {
   const kid = `${did}#${did.split(':')[2]}`
   const signer = NaclSigner(u8a.toString(secretKey, B64))
-  const header = toStableObject(Object.assign(protectedHeader || {}, { kid, alg: 'EdDSA' }))
+  const header = toStableObject(Object.assign(protectedHeader, { kid, alg: 'EdDSA' }))
   return createJWS(toStableObject(payload), signer, header)
 }
 

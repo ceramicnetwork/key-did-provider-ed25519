@@ -11,12 +11,12 @@ npm install --save key-did-provider-ed25519
 
 ```js
 import { Ed25519Provider } from 'key-did-provider-ed25519'
-import { getResolver } from '@ceramicnetwork/key-did-resolver'
+import KeyResolver from '@ceramicnetwork/key-did-resolver'
 import { DID } from 'dids'
 
 const seed = new Uint8Array(...) //  32 bytes with high entropy
 const provider = new Ed25519Provider(seed)
-const did = new DID({ provider, resolver: { registry: getResolver() } })
+const did = new DID({ provider, resolver: KeyResolver.getResolver() })
 await did.authenticate()
 
 // log the DID
