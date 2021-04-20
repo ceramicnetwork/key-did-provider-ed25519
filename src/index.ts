@@ -1,3 +1,4 @@
+import { generateKeyPairFromSeed, convertSecretKeyToX25519 } from '@stablelib/ed25519'
 import { createJWS, decryptJWE, NaclSigner, x25519Decrypter } from 'did-jwt'
 import type {
   AuthParams,
@@ -8,11 +9,10 @@ import type {
   DIDProvider,
   GeneralJWS,
 } from 'dids'
+import stringify from 'fast-json-stable-stringify'
 import { RPCError, createHandler } from 'rpc-utils'
 import type { HandlerMethods, RPCRequest, RPCResponse, SendRequestFunc } from 'rpc-utils'
-import stringify from 'fast-json-stable-stringify'
 import * as u8a from 'uint8arrays'
-import { generateKeyPairFromSeed, convertSecretKeyToX25519 } from '@stablelib/ed25519'
 
 const B64 = 'base64pad'
 

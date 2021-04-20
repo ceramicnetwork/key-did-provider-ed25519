@@ -25,11 +25,11 @@
   "size-limit": [
     {
       "path": "dist/key-did-provider-ed25519.cjs.production.min.js",
-      "limit": "170 KB"
+      "limit": "175 KB"
     },
     {
       "path": "dist/key-did-provider-ed25519.esm.js",
-      "limit": "170 KB"
+      "limit": "175 KB"
     }
   ],
   "devDependencies": {
