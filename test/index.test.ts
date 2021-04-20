@@ -2,8 +2,9 @@ import u8a from 'uint8arrays'
 import { verifyJWS, createJWE, x25519Encrypter } from 'did-jwt'
 import { randomBytes } from '@stablelib/random'
 import { KeyPair, generateKeyPairFromSeed, convertPublicKeyToX25519 } from '@stablelib/ed25519'
+import type { GeneralJWS } from 'dids'
 
-import { encodeDID, Ed25519Provider, GeneralJWS } from '../src'
+import { encodeDID, Ed25519Provider } from '../src'
 
 const b64urlToObj = (s: string): Record<string, any> =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -71,7 +72,7 @@ describe('key-did-provider-ed25519', () => {
       publicKeyBase64: u8a.toString(kp.publicKey, 'base64pad'),
     }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const gjws = res?.result.jws
+    const gjws = res?.result?.jws as GeneralJWS
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const jws = [gjws.signatures[0].protected, gjws.payload, gjws.signatures[0].signature].join('.')
     expect(verifyJWS(jws, pubkey)).toEqual(pubkey)
@@ -88,7 +89,7 @@ describe('key-did-provider-ed25519', () => {
       params: { jwe },
     })
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(res?.result.cleartext).toEqual(u8a.toString(cleartext, 'base64pad'))
+    expect(res?.result?.cleartext as string).toEqual(u8a.toString(cleartext, 'base64pad'))
   })
 
   it('thows if fails to decrypt JWE', async () => {

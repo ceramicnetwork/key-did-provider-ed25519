@@ -1,16 +1,18 @@
-import { createJWS, decryptJWE, NaclSigner, x25519Decrypter, JWE } from 'did-jwt'
-import {
-  HandlerMethods,
-  RequestHandler,
-  RPCConnection,
-  RPCError,
-  RPCRequest,
-  RPCResponse,
-  createHandler,
-} from 'rpc-utils'
-import stringify from 'fast-json-stable-stringify'
-import * as u8a from 'uint8arrays'
 import { generateKeyPairFromSeed, convertSecretKeyToX25519 } from '@stablelib/ed25519'
+import { createJWS, decryptJWE, NaclSigner, x25519Decrypter } from 'did-jwt'
+import type {
+  AuthParams,
+  CreateJWSParams,
+  DecryptJWEParams,
+  DIDMethodName,
+  DIDProviderMethods,
+  DIDProvider,
+  GeneralJWS,
+} from 'dids'
+import stringify from 'fast-json-stable-stringify'
+import { RPCError, createHandler } from 'rpc-utils'
+import type { HandlerMethods, RPCRequest, RPCResponse, SendRequestFunc } from 'rpc-utils'
+import * as u8a from 'uint8arrays'
 
 const B64 = 'base64pad'
 
@@ -28,16 +30,6 @@ export function encodeDID(publicKey: Uint8Array): string {
   return `did:key:z${u8a.toString(bytes, 'base58btc')}`
 }
 
-interface JWSSignature {
-  protected: string
-  signature: string
-}
-
-export interface GeneralJWS {
-  payload: string
-  signatures: Array<JWSSignature>
-}
-
 function toGeneralJWS(jws: string): GeneralJWS {
   const [protectedHeader, payload, signature] = jws.split('.')
   return {
@@ -49,23 +41,6 @@ function toGeneralJWS(jws: string): GeneralJWS {
 interface Context {
   did: string
   secretKey: Uint8Array
-}
-
-interface CreateJWSParams {
-  payload: Record<string, any>
-  protected?: Record<string, any>
-  did: string
-}
-
-interface DecryptJWEParams {
-  jwe: JWE
-  did?: string
-}
-
-interface AuthParams {
-  nonce: string
-  aud: string
-  paths: Array<string>
 }
 
 const sign = async (
@@ -80,7 +55,7 @@ const sign = async (
   return createJWS(toStableObject(payload), signer, header)
 }
 
-const didMethods: HandlerMethods<Context> = {
+const didMethods: HandlerMethods<Context, DIDProviderMethods> = {
   did_authenticate: async ({ did, secretKey }, params: AuthParams) => {
     const response = await sign(
       {
@@ -95,7 +70,7 @@ const didMethods: HandlerMethods<Context> = {
     )
     return toGeneralJWS(response)
   },
-  did_createJWS: async ({ did, secretKey }, params: CreateJWSParams) => {
+  did_createJWS: async ({ did, secretKey }, params: CreateJWSParams & { did: string }) => {
     const requestDid = params.did.split('#')[0]
     if (requestDid !== did) throw new RPCError(4100, `Unknown DID: ${did}`)
     const jws = await sign(params.payload, did, secretKey, params.protected)
@@ -112,23 +87,23 @@ const didMethods: HandlerMethods<Context> = {
   },
 }
 
-export class Ed25519Provider implements RPCConnection {
-  protected _handle: (msg: RPCRequest) => Promise<RPCResponse | null>
+export class Ed25519Provider implements DIDProvider {
+  _handle: SendRequestFunc<DIDProviderMethods>
 
   constructor(seed: Uint8Array) {
     const { secretKey, publicKey } = generateKeyPairFromSeed(seed)
     const did = encodeDID(publicKey)
-    const handler: RequestHandler = createHandler<Context>(didMethods)
-    this._handle = (msg: RPCRequest) => {
-      return handler({ did, secretKey }, msg)
-    }
+    const handler = createHandler<Context, DIDProviderMethods>(didMethods)
+    this._handle = async (msg) => await handler({ did, secretKey }, msg)
   }
 
-  public get isDidProvider(): boolean {
+  get isDidProvider(): boolean {
     return true
   }
 
-  public async send(msg: RPCRequest): Promise<RPCResponse | null> {
+  async send<Name extends DIDMethodName>(
+    msg: RPCRequest<DIDProviderMethods, Name>
+  ): Promise<RPCResponse<DIDProviderMethods, Name> | null> {
     return await this._handle(msg)
   }
 }
