@@ -4,7 +4,7 @@ import { randomBytes } from '@stablelib/random'
 import { KeyPair, generateKeyPairFromSeed, convertPublicKeyToX25519 } from '@stablelib/ed25519'
 import type { GeneralJWS } from 'dids'
 
-import { encodeDID, Ed25519Provider } from '../src'
+import { encodeDID, Ed25519Provider } from '../src/index.js'
 
 const b64urlToObj = (s: string): Record<string, any> =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -106,8 +106,9 @@ describe('key-did-provider-ed25519', () => {
       jsonrpc: '2.0',
       id: 0,
       error: {
+        data: undefined,
         code: -32000,
-        message: 'Failed to decrypt',
+        message: 'failure: Failed to decrypt',
       },
     })
   })
