@@ -44,7 +44,7 @@ interface Context {
 }
 
 const sign = async (
-  payload: Record<string, any>,
+  payload: Record<string, any> | string,
   did: string,
   secretKey: Uint8Array,
   protectedHeader: Record<string, any> = {}
@@ -52,7 +52,7 @@ const sign = async (
   const kid = `${did}#${did.split(':')[2]}`
   const signer = NaclSigner(u8a.toString(secretKey, B64))
   const header = toStableObject(Object.assign(protectedHeader, { kid, alg: 'EdDSA' }))
-  return createJWS(toStableObject(payload), signer, header)
+  return createJWS(typeof payload === 'string' ? payload : toStableObject(payload), signer, header)
 }
 
 const didMethods: HandlerMethods<Context, DIDProviderMethods> = {
