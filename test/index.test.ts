@@ -1,4 +1,4 @@
-import u8a from 'uint8arrays'
+import * as u8a from 'uint8arrays'
 import { verifyJWS, createJWE, x25519Encrypter } from 'did-jwt'
 import { randomBytes } from '@stablelib/random'
 import { KeyPair, generateKeyPairFromSeed, convertPublicKeyToX25519 } from '@stablelib/ed25519'
