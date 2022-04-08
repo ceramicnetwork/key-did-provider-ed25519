@@ -18,6 +18,10 @@
     "type": "git",
     "url": "git+https://github.com/ceramicnetwork/key-did-provider-ed25519.git"
   },
+  "homepage": "https://github.com/ceramicnetwork/key-did-provider-ed25519",
+  "bugs": {
+    "url": "https://github.com/ceramicnetwork/key-did-provider-ed25519/issues"
+  },
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "build": "./node_modules/.bin/tsc --project tsconfig.build.json",
