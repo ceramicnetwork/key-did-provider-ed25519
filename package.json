@@ -23,7 +23,7 @@
     "url": "https://github.com/ceramicnetwork/key-did-provider-ed25519/issues"
   },
   "scripts": {
-    "test": "./node_modules/.bin/jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
     "build": "./node_modules/.bin/tsc --project tsconfig.build.json",
     "prepublishOnly": "npm run build",
     "prebuild": "npm run clean",
@@ -51,7 +51,7 @@
     "@size-limit/webpack-why": "^7.0.5",
     "@types/jest": "^27.0.3",
     "babel-jest": "^27.4.4",
-    "dids": "^3.0.0-alpha.1",
+    "dids": "^3.0.0-alpha.12",
     "eslint": "^8.4.1",
     "eslint-config-3box": "^0.4.0",
     "husky": "^7.0.4",
@@ -63,9 +63,9 @@
   },
   "dependencies": {
     "@stablelib/ed25519": "^1.0.2",
-    "did-jwt": "^5.12.1",
+    "did-jwt": "^6.0.0",
     "fast-json-stable-stringify": "^2.1.0",
-    "rpc-utils": "^0.4.0",
+    "rpc-utils": "^0.6.2",
     "uint8arrays": "^3.0.0"
   }
 }
