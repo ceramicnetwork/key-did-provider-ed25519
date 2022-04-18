@@ -1,5 +1,5 @@
 import { generateKeyPairFromSeed, convertSecretKeyToX25519 } from '@stablelib/ed25519'
-import { createJWS, decryptJWE, NaclSigner, x25519Decrypter } from 'did-jwt'
+import { createJWS, decryptJWE, x25519Decrypter, EdDSASigner } from 'did-jwt'
 import type {
   AuthParams,
   CreateJWSParams,
@@ -50,7 +50,7 @@ const sign = async (
   protectedHeader: Record<string, any> = {}
 ) => {
   const kid = `${did}#${did.split(':')[2]}`
-  const signer = NaclSigner(u8a.toString(secretKey, B64))
+  const signer = EdDSASigner(secretKey)
   const header = toStableObject(Object.assign(protectedHeader, { kid, alg: 'EdDSA' }))
   return createJWS(typeof payload === 'string' ? payload : toStableObject(payload), signer, header)
 }
