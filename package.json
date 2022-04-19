@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0-rc.0",
+  "version": "2.0.0",
   "license": "(Apache-2.0 OR MIT)",
   "type": "module",
   "exports": {
@@ -51,7 +51,7 @@
     "@size-limit/webpack-why": "^7.0.5",
     "@types/jest": "^27.0.3",
     "babel-jest": "^27.4.4",
-    "dids": "^3.0.0-rc.0",
+    "dids": "^3.0.0",
     "eslint": "^8.4.1",
     "eslint-config-3box": "^0.4.0",
     "husky": "^7.0.4",
