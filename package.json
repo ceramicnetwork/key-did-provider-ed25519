@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0",
+  "version": "2.0.1",
   "license": "(Apache-2.0 OR MIT)",
   "type": "module",
   "exports": {
@@ -34,7 +34,7 @@
   },
   "name": "key-did-provider-ed25519",
   "author": "Joel Thorstensson",
-  "module": "./dist/key-did-provider-ed25519.esm.js",
+  "module": "./dist/index.js",
   "size-limit": [
     {
       "path": "dist/index.js",
